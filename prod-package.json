@@ -1,0 +1,7 @@
+{
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/app.js",
+    "dev": "tsc --watch"
+  }
+}
