@@ -10,7 +10,7 @@ export const errorHandler = (
   if (err instanceof AppError) {
     console.log(`Error: ${req.method} ${req.url} - ${err.message}`);
 
-    res.status(err.status).json({
+    return res.status(err.status).json({
       message: err.message,
       ...(err.details && { details: err.details }),
     });
