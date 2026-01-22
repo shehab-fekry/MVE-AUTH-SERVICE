@@ -1,9 +1,9 @@
 {
   "compilerOptions": {
     "noImplicitAny": false,
-    "target": "ES2022",
-    "module": "nodenext",
-    "moduleResolution": "nodenext",
+    "target": "ES2023",
+    "module": "esnext",
+    "moduleResolution": "node",
     "outDir": "dist",
     "rootDir": "src",
     "strict": true,

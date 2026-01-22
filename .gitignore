@@ -40,3 +40,6 @@ Thumbs.db
 # Optional: coverage
 coverage/
 .qodo
+
+# Prisma
+/src/generated/prisma

@@ -19,63 +19,55 @@ export class AppError extends Error {
 }
 
 export class NotFoundError extends AppError {
-  constructor(message = 'Resource Not Found', status = 404) {
-    super(message, status);
+  constructor(message = 'Resource Not Found') {
+    super(message, 404);
   }
 }
 
 export class ValidationError extends AppError {
-  constructor(
-    message: 'Validation Error',
-    status: 409,
-    details: any
-  ) {
-    super(message, status, true, details);
+  constructor(message = 'Validation Error', details?: any) {
+    super(message, 409, true, details);
   }
 }
 
 export class UnauthorizedError extends AppError {
-  constructor(message = 'Unauthorized Access', status = 401) {
-    super(message, status);
+  constructor(message = 'Unauthorized Access') {
+    super(message, 401);
   }
 }
 
 export class AuthenticationError extends AppError {
-  constructor(message = 'Authentication Failed', status = 403) {
-    super(message, status);
+  constructor(message = 'Authentication Failed') {
+    super(message, 403);
   }
 }
 
 export class BadRequestError extends AppError {
-  constructor(message = 'Bad Request', status = 400) {
-    super(message, status);
+  constructor(message = 'Bad Request') {
+    super(message, 400);
   }
 }
 
 export class InternalServerError extends AppError {
-  constructor(message = 'Internal Server Error', status = 500) {
-    super(message, status);
+  constructor(message = 'Internal Server Error') {
+    super(message, 500);
   }
 }
 
 export class timeoutError extends AppError {
-  constructor(message = 'Request Timeout', status = 408) {
-    super(message, status);
+  constructor(message = 'Request Timeout') {
+    super(message, 408);
   }
 }
 
 export class DataBaseError extends AppError {
-  constructor(
-    message = 'Database Error',
-    status = 500,
-    details?: any
-  ) {
-    super(message, status, true, details);
+  constructor(message = 'Database Error', details?: any) {
+    super(message, 500, true, details);
   }
 }
 
 export class RateLimitError extends AppError {
-  constructor(message: 'Too Many Requests', status = 429) {
-    super(message, status);
+  constructor(message = 'Too Many Requests') {
+    super(message, 429);
   }
 }
