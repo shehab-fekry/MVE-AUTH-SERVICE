@@ -26,7 +26,7 @@ export class NotFoundError extends AppError {
 
 export class ValidationError extends AppError {
   constructor(message = 'Validation Error', details?: any) {
-    super(message, 409, true, details);
+    super(message, 403, true, details);
   }
 }
 
@@ -38,7 +38,7 @@ export class UnauthorizedError extends AppError {
 
 export class AuthenticationError extends AppError {
   constructor(message = 'Authentication Failed') {
-    super(message, 403);
+    super(message, 401);
   }
 }
 

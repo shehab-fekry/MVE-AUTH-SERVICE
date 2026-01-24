@@ -1,8 +1,10 @@
 import js from '@eslint/js';
 import tsParser from '@typescript-eslint/parser';
+import globals from 'globals';
+
 import tsPlugin from '@typescript-eslint/eslint-plugin';
 import prettierPlugin from 'eslint-plugin-prettier';
-import globals from 'globals';
+import importPlugin from 'eslint-plugin-import';
 
 export default [
   js.configs.recommended,
@@ -24,6 +26,7 @@ export default [
     plugins: {
       '@typescript-eslint': tsPlugin,
       prettier: prettierPlugin,
+      import: importPlugin, // 👈 add this
     },
     rules: {
       ...tsPlugin.configs.recommended.rules,
@@ -32,7 +35,17 @@ export default [
         'warn',
         { argsIgnorePattern: '^_' },
       ],
+      // Allow explicit any
       '@typescript-eslint/no-explicit-any': 'off',
+      // Enforce .js extension for Node ESM
+      'import/extensions': [
+        'error',
+        'ignorePackages',
+        {
+          js: 'always',
+          ts: 'never',
+        },
+      ],
     },
   },
 

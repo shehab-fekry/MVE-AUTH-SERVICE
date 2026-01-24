@@ -1,4 +1,4 @@
-import 'dotenv/config'; // Load environment variables from .env file
+import 'dotenv/config'; // Load environment variables from .env file to process.env
 
 import express from 'express';
 import morgan from 'morgan';

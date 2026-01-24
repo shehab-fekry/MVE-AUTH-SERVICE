@@ -1,14 +1,27 @@
-import { Request, Response } from 'express';
-import { registerValidation } from '../utils/func/register-validation.js';
-import { prisma } from '../lib/prisma.js';
+import { NextFunction, Request, Response } from 'express';
+import { registerValidation } from '../utils/func/validation/index.js';
+import { prisma } from '../libs/prisma.js';
 import { ValidationError } from '../utils/errors/index.js';
+import {
+  checkOtpRestrictions,
+  sendOtp,
+  trackOtpRequests,
+} from '../utils/func/otp/index.js';
 
-export const signin = (req: Request, res: Response) => {
+export const signin = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   res.send('Hello from sigin!');
 };
 
-export const signup = async (req: Request, res: Response) => {
-  const { email } = req.body;
+export const signup = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { email, name } = req.body;
 
   // Validate user registration data
   registerValidation(req.body, 'user');
@@ -18,20 +31,19 @@ export const signup = async (req: Request, res: Response) => {
     where: { email },
   });
   if (userExist) {
-    throw new ValidationError('User already exists with this email!');
+    return next(
+      new ValidationError('User already exists with this email!')
+    );
   }
 
-  // Create new user
-  const newUser = await prisma.users.create({
-    data: {
-      name: req.body.name,
-      email: req.body.email,
-      password: req.body.password,
-    },
+  // check OTP restrictions
+  await checkOtpRestrictions(email, next);
+  // track OTP requests
+  await trackOtpRequests(email, next);
+  // send OTP to email
+  await sendOtp(email, name, 'user-activation');
+
+  res.status(201).json({
+    message: 'OTP sent to email, please check you account.',
   });
-  if (!newUser) {
-    throw new Error('Failed to create new user!');
-  }
-
-  res.status(201).json({ message: 'User created successfully!' });
 };

@@ -1,5 +1,6 @@
-import { ValidationError } from '../errors/index.js';
+import { ValidationError } from '../../errors/index.js';
 
+// Validate registration data for users and sellers
 export const registerValidation = (
   data: any,
   userType: 'user' | 'seller'
