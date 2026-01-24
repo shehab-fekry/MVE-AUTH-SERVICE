@@ -1,6 +1,5 @@
 import ejs from 'ejs';
 import path from 'path';
-import { InternalServerError } from '../../errors/index.js';
 import { transporter } from '../../../libs/nodemailer.js';
 
 export const renderEmailTemplate = async (
@@ -26,18 +25,14 @@ export const sendEmail = async (
   template: string,
   data: Record<string, any>
 ) => {
-  try {
-    const html = await renderEmailTemplate(template, data);
+  const html = await renderEmailTemplate(template, data);
 
-    const res = await transporter.sendMail({
-      from: `${process.env.SMTP_USER}`,
-      to,
-      subject,
-      html,
-    });
-    console.log('🚀 ~ sendEmail ~ res:', res);
-  } catch (err) {
-    console.error('Error sending email:', err);
-    throw new InternalServerError();
-  }
+  const res = await transporter.sendMail({
+    from: `${process.env.SMTP_USER}`,
+    to,
+    subject,
+    html,
+  });
+
+  console.log('🚀 ~ sendEmail ~ res:', res);
 };

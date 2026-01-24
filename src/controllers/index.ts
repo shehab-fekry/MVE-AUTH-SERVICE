@@ -36,14 +36,18 @@ export const signup = async (
     );
   }
 
-  // check OTP restrictions
-  await checkOtpRestrictions(email, next);
-  // track OTP requests
-  await trackOtpRequests(email, next);
-  // send OTP to email
-  await sendOtp(email, name, 'user-activation');
+  try {
+    // check OTP restrictions
+    await checkOtpRestrictions(email);
+    // track OTP requests
+    await trackOtpRequests(email);
+    // send OTP to email
+    await sendOtp(email, name, 'user-activation');
 
-  res.status(201).json({
-    message: 'OTP sent to email, please check you account.',
-  });
+    res.status(201).json({
+      message: 'OTP sent to email, please check you account.',
+    });
+  } catch (err) {
+    return next(err);
+  }
 };
