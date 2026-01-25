@@ -1,11 +1,13 @@
 import 'dotenv/config'; // Load environment variables from .env file to process.env
 
-import express from 'express';
+import express, { Request, Response } from 'express';
 import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
+import swaggerUI from 'swagger-ui-express';
 
 import { errorHandler } from './utils/middlewares/error-handler.js';
 import router from './routes/index.js';
+import swaggerDocs from './swagger-output.json' with { type: 'json' };
 
 // Create an Express application
 const app = express();
@@ -25,12 +27,19 @@ app.use(cookieParser());
 // log request info (logger)
 app.use(morgan('dev'));
 
-// routes...
+// Health check route
 app.get('/auth-health', (req, res) => {
   res.send('Hello from auth service!');
 });
 
+// routes...
 app.use('/api', router);
+
+// Swagger API documentation route
+app.use('/api/docs', swaggerUI.serve, swaggerUI.setup(swaggerDocs));
+app.get('/api/docs-json', (req: Request, res: Response) => {
+  res.json(swaggerDocs);
+});
 
 // error handler middleware
 app.use(errorHandler);

@@ -15,18 +15,21 @@
     "start": "node dist/app.js",
     "lint": "eslint 'src/**/*.ts' 'scripts/**/*.{js,ts}'",
     "typecheck": "tsc --noEmit",
-    "build": "bun run lint && bun run tsc"
+    "build": "bun run swagger bun run lint && bun run tsc",
+    "swagger": "bun src/libs/swagger-autogen.ts"
   },
   "dependencies": {
-    "express": "^5.2.1",
-    "dotenv": "^17.2.3",
-    "cookie-parser": "^1.4.7",
-    "morgan": "^1.10.1",
-    "ioredis": "^5.9.2",
-    "ejs": "^4.0.1",
-    "nodemailer": "^7.0.12",
     "@prisma/client": "6.19",
-    "prisma": "6.19"
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^17.2.3",
+    "ejs": "^4.0.1",
+    "express": "^5.2.1",
+    "ioredis": "^5.9.2",
+    "morgan": "^1.10.1",
+    "nodemailer": "^7.0.12",
+    "prisma": "6.19",
+    "swagger-ui-express": "^5.0.1",
+    "swagger-autogen": "^2.23.7"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
@@ -37,6 +40,7 @@
     "@types/node": "^25.0.9",
     "@typescript-eslint/eslint-plugin": "^8.53.0",
     "@typescript-eslint/parser": "^8.53.0",
+    "@types/swagger-ui-express": "^4.1.8",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import": "^2.32.0",

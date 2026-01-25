@@ -39,7 +39,12 @@ Thumbs.db
 
 # Optional: coverage
 coverage/
-.qodo
 
 # Prisma
 /src/generated/prisma
+
+# Swagger
+/src/swagger-output.json
+
+# Extension files
+.qodo
