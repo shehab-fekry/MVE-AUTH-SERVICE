@@ -50,7 +50,7 @@ export const trackOtpRequests = async (email: string) => {
     (await redis.get(`otp-req-count:${email}`)) || '0'
   );
 
-  // if more than 2 requests in the last 1 hour, lock for 1 hour
+  // if more than 3 requests, lock for 1 hour
   if (optRequests > 2) {
     await redis.set(`otp-gen-lock:${email}`, 'locked', 'EX', 3600);
     throw new ValidationError(
