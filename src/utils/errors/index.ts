@@ -25,7 +25,7 @@ export class NotFoundError extends AppError {
 }
 
 export class ValidationError extends AppError {
-  constructor(message = 'Validation Error', details?: any) {
+  constructor(message = 'Invalid Inputs', details?: any) {
     super(message, 403, true, details);
   }
 }
