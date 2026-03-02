@@ -12,7 +12,7 @@ export const setCookies = (
     res.cookie(key, payload[key], {
       httpOnly: true,
       secure: isProd,
-      sameSite: 'none',
+      sameSite: isProd ? 'none' : 'lax',
       maxAge:
         key === 'accessToken' ? 5 * 60 * 1000 : 24 * 60 * 60 * 1000,
     });

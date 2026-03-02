@@ -2,7 +2,7 @@ import 'dotenv/config'; // Load environment variables from .env file to process.
 
 import { NextFunction, Request, Response } from 'express';
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
+import jwt, { JsonWebTokenError } from 'jsonwebtoken';
 import { prisma } from '../libs/prisma.js';
 import { registerValidation } from '../utils/func/validation/index.js';
 import {
@@ -141,14 +141,22 @@ export const userLogin = async (
 
     // generate access token
     const accessToken = jwt.sign(
-      { userId: userExist.id, role: 'user' },
+      {
+        id: userExist.id,
+        name: userExist.name,
+        role: 'user',
+      },
       `${process.env.ACCESS_TOKEN_SECRET}`,
       { expiresIn: '15m' }
     );
 
     // generate refresh token
     const refreshToken = jwt.sign(
-      { userId: userExist.id, role: 'user' },
+      {
+        id: userExist.id,
+        name: userExist.name,
+        role: 'user',
+      },
       `${process.env.REFRESH_TOKEN_SECRET}`,
       {
         expiresIn: '2d',
@@ -168,6 +176,83 @@ export const userLogin = async (
     });
   } catch (err) {
     return next(err);
+  }
+};
+
+// get logged-in user info
+export const userInfo = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const user = (req as Request & { user: any }).user;
+
+  try {
+    res.status(200).json({ user: user });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const refreshToken = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { refreshToken } = req.cookies;
+
+    // check if refreshToken is recieved
+    if (!refreshToken) {
+      throw new ValidationError('Unauthorized! no refresh token.');
+    }
+
+    // decode refresh token
+    const decoded = jwt.verify(
+      refreshToken,
+      `${process.env.REFRESH_TOKEN_SECRET}`
+    ) as jwt.JwtPayload;
+
+    // check decoded payload
+    if (!decoded || !decoded.id || !decoded.name) {
+      throw new JsonWebTokenError(
+        'Forbidden! Invalid refresh token!'
+      );
+    }
+
+    // check if user exists
+    const user = await prisma.users.findUnique({
+      where: { id: decoded.id },
+    });
+    if (!user) {
+      throw new AuthenticationError(
+        'Forbidden! User/Seller not found.'
+      );
+    }
+
+    // generate new accessToken, refreshToken
+    const newAcccessToken = jwt.sign(
+      { id: user.id, name: user.name, role: 'user' },
+      `${process.env.ACCESS_TOKEN_SECRET}`,
+      {
+        expiresIn: '15m',
+      }
+    );
+    const newRefreshToken = jwt.sign(
+      { id: user.id, name: user.name, role: 'user' },
+      `${process.env.REFRESH_TOKEN_SECRET}`,
+      { expiresIn: '2d' }
+    );
+
+    // append tokens to response cookies
+    setCookies(res, {
+      accessToken: newAcccessToken,
+      refreshToken: newRefreshToken,
+    });
+
+    res.status(201).json({ success: true });
+  } catch (err) {
+    next(err);
   }
 };
 

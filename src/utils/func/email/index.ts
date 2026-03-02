@@ -33,6 +33,4 @@ export const sendEmail = async (
     subject,
     html,
   });
-
-  console.log('🚀 ~ sendEmail ~ res:', res);
 };
