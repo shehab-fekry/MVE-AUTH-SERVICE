@@ -162,7 +162,9 @@ export const handleForgotPassword = async (
     where: { email },
   });
   if (!userExist) {
-    throw new AuthenticationError(`${userType} not found!`);
+    throw new AuthenticationError(
+      `No ${userType} exist with the provided email!`
+    );
   }
 
   // check OTP restrictions
@@ -256,6 +258,6 @@ export const handleRestPassword = async (
   await redis.del(`otp-req-count:${email}`);
 
   res.status(200).json({
-    mesage: 'Password reset successfully!',
+    message: 'Password reset successfully!',
   });
 };

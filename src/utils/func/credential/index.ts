@@ -10,9 +10,9 @@ export const setCookies = (
 
   for (const key in payload) {
     res.cookie(key, payload[key], {
-      httpOnly: true,
-      secure: isProd,
-      sameSite: isProd ? 'none' : 'lax',
+      httpOnly: true, // prevents JavaScript from accessing the cookie. (protects against XSS attacks)
+      secure: isProd, // cookie is only sent over HTTPS. (production → always true)
+      sameSite: 'lax',
       maxAge:
         key === 'accessToken' ? 5 * 60 * 1000 : 24 * 60 * 60 * 1000,
     });

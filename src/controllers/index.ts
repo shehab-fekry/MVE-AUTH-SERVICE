@@ -230,7 +230,7 @@ export const refreshToken = async (
       );
     }
 
-    // generate new accessToken, refreshToken
+    // generate new accessToken
     const newAcccessToken = jwt.sign(
       { id: user.id, name: user.name, role: 'user' },
       `${process.env.ACCESS_TOKEN_SECRET}`,
@@ -238,6 +238,8 @@ export const refreshToken = async (
         expiresIn: '15m',
       }
     );
+    // generate new refreshToken (refresh token rotation)
+    // optional, you can keep the same refresh token until it expires, but generating a new one is more secure
     const newRefreshToken = jwt.sign(
       { id: user.id, name: user.name, role: 'user' },
       `${process.env.REFRESH_TOKEN_SECRET}`,
