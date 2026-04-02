@@ -49,7 +49,8 @@ const isAuthenticated = async (
     }
 
     // exclude sensitive info
-    const { password, createdAt, updatedAt, ...rest } = userExist;
+    const { password, createdAt, updatedAt, stripeId, ...rest } =
+      userExist;
     // store user info in req object (used by 'user-login' route to send user info)
     // @ts-expect-error - property user dosn't exist in req object
     req.user = rest;

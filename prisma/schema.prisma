@@ -14,21 +14,70 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Images {
-  id      String @id @default(auto()) @map("_id") @db.ObjectId
-  file_id String
-  url     String
-  users   users  @relation(fields: [user_id], references: [id])
-  user_id String @unique @db.ObjectId
+enum UserRole {
+  CUSTOMER
+  SELLER
+  ADMIN
 }
 
+model Images {
+  id     String    @id @default(auto()) @map("_id") @db.ObjectId // PK
+  fileId String
+  url    String
+  userId String?    @unique @db.ObjectId // FK
+  shopId String?    @unique @db.ObjectId // FK
+  // relations
+  users  users?     @relation(name: "UserImage", fields: [userId], references: [id])
+  shops  shops?     @relation(name: "ShopImage", fields: [shopId], references: [id])
+}
+
+model shopReviews {
+  id         String    @id @default(auto()) @map("_id") @db.ObjectId // PK
+  rating     Float
+  review     String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  shopId     String    @db.ObjectId // FK
+  userId     String    @db.ObjectId // FK
+  // relations
+  shops      shops     @relation(fields: [shopId], references: [id])
+  users      users    @relation(fields: [userId], references: [id])
+}
+
+model shops {
+  id           String       @id @default(auto()) @map("_id") @db.ObjectId() // PK
+  name         String
+  bio          String?
+  category     String
+  image        Images?      @relation("ShopImage")
+  coverBanner  String?
+  address      String
+  openingHours String?
+  website      String?
+  socialLinks  Json[]
+  rating       Float         @default(0)
+  reviews      shopReviews[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  userId       String        @unique @db.ObjectId // FK
+  // relations
+  users        users         @relation(fields: [userId], references: [id])
+}
+
+
 model users {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  name      String
-  email     String   @unique
-  password  String?
-  avatar    Images?
-  following String[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId // PK
+  name         String
+  email        String   @unique
+  password     String?
+  image        Images?  @relation("UserImage")
+  following    String[]
+  reviews      shopReviews[]
+  phoneNumber  String?
+  country      String?
+  shop         shops?
+  stripeId     String?
+  role         UserRole
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }

@@ -1,17 +1,22 @@
+import { userRole } from '../../../constants/index.js';
 import { ValidationError } from '../../errors/index.js';
 
 // Validate registration data for users and sellers
-export const registerValidation = (
-  data: any,
-  userType: 'user' | 'seller'
-) => {
-  const { name, email, password, phoneNumber, country } = data;
+export const registerValidation = (data: any) => {
+  const { name, email, password, phoneNumber, country, role } = data;
+
+  if (
+    !role ||
+    (role !== userRole.CUSTOMER && role !== userRole.SELLER)
+  ) {
+    throw new ValidationError('Invalid user type!');
+  }
 
   if (
     !name ||
     !email ||
     !password ||
-    (userType === 'seller' && (!phoneNumber || !country))
+    (role === userRole.SELLER && (!phoneNumber || !country))
   ) {
     throw new ValidationError('Missing required fields!');
   }

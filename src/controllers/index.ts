@@ -19,6 +19,7 @@ import {
   verifyOtp,
 } from '../utils/func/otp/index.js';
 import { setCookies } from '../utils/func/credential/index.js';
+import { userRole } from '../constants/index.js';
 
 // register new user
 export const userRegisteration = async (
@@ -26,15 +27,16 @@ export const userRegisteration = async (
   res: Response,
   next: NextFunction
 ) => {
-  const { email, name } = req.body;
+  const { email, name, role } = req.body;
 
   // Validate user registration data
-  registerValidation(req.body, 'user');
+  registerValidation(req.body);
 
   // Check if user already exists
   const userExist = await prisma.users.findUnique({
     where: { email },
   });
+
   if (userExist) {
     return next(
       new ValidationError('User already exists with this email!')
@@ -48,10 +50,12 @@ export const userRegisteration = async (
     await trackOtpRequests(email);
     // send OTP to email
     await sendOtp(
-      email,
       name,
+      email,
       'Email Activiation',
-      'user-activation'
+      role === userRole.CUSTOMER
+        ? 'customer-activation'
+        : 'seller-activation'
     );
 
     res.status(200).json({
@@ -69,10 +73,24 @@ export const userVerification = async (
   next: NextFunction
 ) => {
   try {
-    const { name, email, password, otp } = req.body;
+    const { name, email, password, phoneNumber, country, otp, role } =
+      req.body;
+
+    if (
+      !role ||
+      (role !== userRole.CUSTOMER && role !== userRole.SELLER)
+    ) {
+      throw new ValidationError('Invalid user role!');
+    }
 
     // check if email, password and OTP are provided
-    if (!name || !email || !password || !otp) {
+    if (
+      !name ||
+      !email ||
+      !password ||
+      !otp ||
+      (role === userRole.SELLER && (!phoneNumber || !country))
+    ) {
       throw new ValidationError('All fields are required!');
     }
 
@@ -98,6 +116,11 @@ export const userVerification = async (
         name: req.body.name,
         email: req.body.email,
         password: hashedPass,
+        ...(role === userRole.SELLER && {
+          phoneNumber,
+          country,
+        }),
+        role,
       },
     });
 
@@ -120,10 +143,11 @@ export const userLogin = async (
     if (!email || !password) {
       throw new ValidationError('Email and password are required!');
     }
-    // check if user doesn't exist
+    // check if user exist
     const userExist = await prisma.users.findUnique({
       where: { email },
     });
+
     if (!userExist) {
       throw new AuthenticationError(
         "User doesn't exist with provided email, please signup first."
@@ -144,7 +168,7 @@ export const userLogin = async (
       {
         id: userExist.id,
         name: userExist.name,
-        role: 'user',
+        role: userExist.role,
       },
       `${process.env.ACCESS_TOKEN_SECRET}`,
       { expiresIn: '15m' }
@@ -155,7 +179,7 @@ export const userLogin = async (
       {
         id: userExist.id,
         name: userExist.name,
-        role: 'user',
+        role: userExist.role,
       },
       `${process.env.REFRESH_TOKEN_SECRET}`,
       {
@@ -221,18 +245,20 @@ export const refreshToken = async (
     }
 
     // check if user exists
-    const user = await prisma.users.findUnique({
+    const userExists = await prisma.users.findUnique({
       where: { id: decoded.id },
     });
-    if (!user) {
-      throw new AuthenticationError(
-        'Forbidden! User/Seller not found.'
-      );
+    if (!userExists) {
+      throw new AuthenticationError('Forbidden! user not found.');
     }
 
     // generate new accessToken
     const newAcccessToken = jwt.sign(
-      { id: user.id, name: user.name, role: 'user' },
+      {
+        id: userExists.id,
+        name: userExists.name,
+        role: userExists.role,
+      },
       `${process.env.ACCESS_TOKEN_SECRET}`,
       {
         expiresIn: '15m',
@@ -241,7 +267,11 @@ export const refreshToken = async (
     // generate new refreshToken (refresh token rotation)
     // optional, you can keep the same refresh token until it expires, but generating a new one is more secure
     const newRefreshToken = jwt.sign(
-      { id: user.id, name: user.name, role: 'user' },
+      {
+        id: userExists.id,
+        name: userExists.name,
+        role: userExists.role,
+      },
       `${process.env.REFRESH_TOKEN_SECRET}`,
       { expiresIn: '2d' }
     );
@@ -266,7 +296,7 @@ export const forgotUserPassword = async (
 ) => {
   try {
     // shared logic between user/seller
-    await handleForgotPassword(req, res, 'user');
+    await handleForgotPassword(req, res);
   } catch (err) {
     return next(err);
   }
@@ -294,7 +324,7 @@ export const resetUserPassword = async (
 ) => {
   try {
     // shared logic between user/seller
-    await handleRestPassword(req, res, 'user');
+    await handleRestPassword(req, res);
   } catch (err) {
     return next(err);
   }

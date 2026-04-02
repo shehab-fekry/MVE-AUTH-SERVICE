@@ -16,10 +16,10 @@ const router = express.Router();
 router.post('/user-registeration', userRegisteration);
 router.post('/user-verification', userVerification);
 router.post('/user-login', userLogin);
-router.get('/user-info', isAuthenticated, userInfo);
-router.get('/refresh-token', refreshToken);
 router.post('/forgot-user-password', forgotUserPassword);
 router.post('/verify-forgot-user-password', verifyForgotUserPassword);
 router.post('/reset-user-password', resetUserPassword);
+router.get('/refresh-token', refreshToken);
+router.get('/user-info', isAuthenticated, userInfo);
 
 export default router;

@@ -109,8 +109,8 @@ export const trackOtpAttempts = async (email: string) => {
 };
 
 export const sendOtp = async (
-  email: string,
   name: string,
+  email: string,
   subject: string,
   template: string
 ) => {
@@ -147,8 +147,7 @@ export const verifyOtp = async (email: string, otp: string) => {
 
 export const handleForgotPassword = async (
   req: Request,
-  res: Response,
-  userType: 'user' | 'seller'
+  res: Response
 ) => {
   const { email } = req.body;
 
@@ -157,13 +156,13 @@ export const handleForgotPassword = async (
     throw new ValidationError('Email is Required!');
   }
 
-  // chack if user/seller exist in DB
+  // chack if user exist in DB
   const userExist = await prisma.users.findUnique({
     where: { email },
   });
   if (!userExist) {
     throw new AuthenticationError(
-      `No ${userType} exist with the provided email!`
+      `No user exist with the provided email!`
     );
   }
 
@@ -173,8 +172,8 @@ export const handleForgotPassword = async (
   await trackOtpRequests(email);
   // generate OTP and send email
   sendOtp(
-    email,
     userExist.name,
+    email,
     'Forgot Password',
     'forgot-password'
   );
@@ -206,8 +205,7 @@ export const handleVerifyForgotPassword = async (
 
 export const handleRestPassword = async (
   req: Request,
-  res: Response,
-  userType: 'user' | 'seller'
+  res: Response
 ) => {
   const { email, newPassword, confirmPassword } = req.body;
 
@@ -228,9 +226,12 @@ export const handleRestPassword = async (
     where: { email },
   });
   if (!userExists) {
-    throw new AuthenticationError(`${userType} not found!`);
+    throw new AuthenticationError(
+      `No user exist with the provided email!`
+    );
   }
 
+  // compare passwords
   const isSame = await bcrypt.compare(
     newPassword,
     userExists.password!
